@@ -74,7 +74,7 @@ def bundleAdjustment(m, f, GCP_left, GCP_right, GCP_ground, unknown_left, unknow
 
 if __name__=="__main__":
     f = 150
-    path = 'input4.xlsx'
+    path = 'input1.xlsx'
     df = pd.read_excel(path, engine='openpyxl', dtype=float)
     coordination = df.to_numpy()
     GCP_left = coordination[0:4,0:2] 

@@ -97,7 +97,7 @@ def rearAndFrontal(m, f, GCP_left, GCP_right, GCP_ground, unknown_left, unknown_
     return result_Ground
 
 if __name__=="__main__":
-    df = pd.read_excel('input2.xlsx', engine='openpyxl', dtype=float)
+    df = pd.read_excel('input1.xlsx', engine='openpyxl', dtype=float)
     data = df.to_numpy()
     m = 10000
     f = 150

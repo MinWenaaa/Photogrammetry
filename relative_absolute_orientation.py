@@ -98,6 +98,8 @@ def getGeodeticPoint(AO_elements, auxilary):
 
     R = rotationMatrix(AO_elements[4], AO_elements[5], AO_elements[6])
 
+    print(AO_elements)
+    print(auxilary)
     n = auxilary.shape[0]
     geodetic_point = np.zeros((n,3))
     for i in range(n):
@@ -109,7 +111,7 @@ def getGeodeticPoint(AO_elements, auxilary):
 if __name__=="__main__":
     
     f = 150
-    path = 'input4.xlsx'
+    path = 'input1.xlsx'
     df = pd.read_excel(path, engine='openpyxl', dtype=float)
     coordination = df.to_numpy()
     point_left = coordination[0:4,0:2] 
