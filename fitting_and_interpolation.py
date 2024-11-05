@@ -63,6 +63,7 @@ def moving_surface(nearby_points, target_point):
 
     return dX[5]
 
+# 矩阵输出为tif
 def output2tif(array, file_path):
     driver = gdal.GetDriverByName('GTiff')
     cols = array.shape[1]
@@ -73,6 +74,27 @@ def output2tif(array, file_path):
     dst_ds.FlushCache()
     dst_ds = None
 
+
+def linear_fitting(origin_array, origin_dpi, new_dpi):
+    origin_height = origin_array.shape[0]
+    origin_width = origin_array.shape[1]
+    new_height = int(origin_height*origin_dpi/new_dpi)
+    new_width = int(origin_width*origin_dpi/new_dpi)
+    new_array = np.zeros((new_height, new_width))
+
+    for i in range(new_height):
+        for j in range(new_width):
+            x = int(j*new_dpi/origin_dpi)
+            y = int(i*new_dpi/origin_dpi)
+            X = ((j*new_dpi)%origin_dpi)/origin_dpi
+            Y = ((i*new_dpi)%origin_dpi)/origin_dpi
+            value = origin_array[y:y+2, x:x+2]
+            A = np.array([[(1-X)*(1-Y), X*(1-Y)], [(1-X)*Y, X*Y]])
+            test = np.sum(A*value)
+            new_array[i][j] = test
+
+    return new_array
+
 if __name__=="__main__":
     """
     data_matrix = read_point_data('data/pre-points  - Cloud2.txt')
@@ -82,10 +104,13 @@ if __name__=="__main__":
     """
 
     table = pd.read_csv('output/moving_curve.csv')
-    result = table.to_numpy()
+    moving = table.to_numpy()
 
-    result = result[:,2].reshape((88,55)).T
+    moving = moving[:,2].reshape((88,55)).T
 
-    output2tif(result, 'output\moving_curve.tif')
+    linear = linear_fitting(moving, 15, 10)
+
+
+    output2tif(linear, 'output\linear.tif')
 
     
