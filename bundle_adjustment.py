@@ -1,13 +1,12 @@
 import numpy as np
 import pandas as pd
-from math import cos, sin, sqrt
 from rear_frontal_intersection import AandL, spatialRearIntersection, rearAndFrontal
 
 def bundleAdjustment(m, f, GCP_left, GCP_right, GCP_ground, unknown_left, unknown_right):
     # 获取初始值
     EO_left = spatialRearIntersection(m, f, GCP_left, GCP_ground)
     EO_right = spatialRearIntersection(m, f, GCP_right, GCP_ground)
-    t = np.hstack((EO_left, EO_right))
+    t = np.hstack((EO_left[:6], EO_right[:6]))
 
     X = rearAndFrontal(m=m, f=f,
         GCP_left=GCP_left, GCP_right=GCP_right, GCP_ground=GCP_ground,
@@ -45,13 +44,6 @@ def bundleAdjustment(m, f, GCP_left, GCP_right, GCP_ground, unknown_left, unknow
         
         B = B[:, 3*GCP_left.shape[0]:]
 
-        """
-        C = np.hstack((A,B))
-        dX = (np.linalg.inv(C.T@C)@C.T@L.T).ravel()
-                t = t + dX[0:12]
-        X = X + dX.reshape(9,3)[8:13,:]
-        
-        """
         N_11 = A.T @ A
         N_12 = A.T @ B
         N_22 = B.T @ B
@@ -67,14 +59,14 @@ def bundleAdjustment(m, f, GCP_left, GCP_right, GCP_ground, unknown_left, unknow
         if (dX<0.3e-4).all() and (dt[:3]<0.3e-4).all() and (dt[3:]<1e-5).all():
             break;
     
-    print(X)
-    print(count)
+    print("迭代次数：\n", count)
+    print("未知点坐标：\n", X)
 
     return 0
 
 if __name__=="__main__":
     f = 150
-    path = 'input1.xlsx'
+    path = 'data/input1.xlsx'
     df = pd.read_excel(path, engine='openpyxl', dtype=float)
     coordination = df.to_numpy()
     GCP_left = coordination[0:4,0:2] 

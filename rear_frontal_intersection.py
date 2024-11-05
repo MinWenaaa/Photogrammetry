@@ -29,11 +29,15 @@ def AandL(f, EO, image, ground):
 
     return np.hstack((a, np.array([b, c, d, L]).T,))
 
+# 后方交会求外方位元素
 def spatialRearIntersection(m, f, image, ground):
 
     X = np.array([np.mean(ground[:,0]), np.mean(ground[:,1]), m*f, 0, 0, 0])
+    count = 0
 
     while(True):
+
+        count = count + 1
 
         temp = AandL(f, X, image, ground)
         A = temp[:,0:6]
@@ -47,15 +51,14 @@ def spatialRearIntersection(m, f, image, ground):
             continue
         break
 
-    print(A@dX)
-    print(L)
-
     V = A@dX - L
     VTPV = sqrt(V@V.T/2)
-    #print('单位权中误差：\n', VTPV)
 
-    return X
+    print("迭代次数：", count)
 
+    return np.hstack((X, VTPV))
+
+# 前方交会
 def frontalIntersection(f, exteriorOrientation_left, exteriorOrientation_right, unknownPoint_left, unknownPoint_right):
 
     R_left = rotationMatrix(exteriorOrientation_left[3], exteriorOrientation_left[4], exteriorOrientation_left[5])
@@ -80,8 +83,10 @@ def rearAndFrontal(m, f, GCP_left, GCP_right, GCP_ground, unknown_left, unknown_
     EO_left = spatialRearIntersection(m, f, GCP_left, GCP_ground)
     EO_right = spatialRearIntersection(m, f, GCP_right, GCP_ground)
 
-    #print(EO_left)
-    #print(EO_right)
+    print("左片外方位元素：", EO_left[:6])
+    print("左片单位权中误差：", EO_left[6])
+    print("右片外方位元素：", EO_right[:6])
+    print("右片单位权中误差：", EO_right[6])
 
     n = unknown_left.shape[0]
 
@@ -97,7 +102,7 @@ def rearAndFrontal(m, f, GCP_left, GCP_right, GCP_ground, unknown_left, unknown_
     return result_Ground
 
 if __name__=="__main__":
-    df = pd.read_excel('input1.xlsx', engine='openpyxl', dtype=float)
+    df = pd.read_excel('data/input1.xlsx', engine='openpyxl', dtype=float)
     data = df.to_numpy()
     m = 10000
     f = 150
@@ -108,4 +113,6 @@ if __name__=="__main__":
     unknownPoint_left = data[4:9, 0:2]
     unknownPoint_right = data[4:9, 2:4]
 
-    rearAndFrontal(m, f, GCP_left, GCP_right, GCP_ground, unknownPoint_left, unknownPoint_right)
+    result = rearAndFrontal(m, f, GCP_left, GCP_right, GCP_ground, unknownPoint_left, unknownPoint_right)
+    print("未知点坐标")
+    print(result)

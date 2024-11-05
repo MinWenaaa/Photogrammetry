@@ -42,11 +42,13 @@ def relativeOrientation(point_left, point_right, f):
 
     V = A@dX - L
     VTPV = sqrt(V@V.T/(2*n-5))
+    print("迭代次数：", count)
     print("单位权中误差：")
     print(VTPV, '\n', X)
 
     return np.array([X[0], X[1], X[2], bu*10, bu*X[3]*10, bu*X[4]*10])
 
+# 像点坐标前方交会到模型点坐标
 def imagePoint2groundPoint(image_left, image_right, RO_elements, f):
     EO_left = np.array([0, 0, 0, 0, 0, 0])
     EO_right = np.hstack((RO_elements[3:6], RO_elements[0:3]))
@@ -77,7 +79,6 @@ def absoluteOrientation(auxiliary, geodetic):
     while(True):
         # 常数项与误差方程系数
         R_0 = rotationMatrix(X[4],X[5],X[6])
-
         for i in range(n):
             L[i*3:i*3+3] = geodetic_copy[i,:] - X[3]*R_0@auxiliary_copy[i,:] - X[0:3]
         
@@ -87,19 +88,18 @@ def absoluteOrientation(auxiliary, geodetic):
         X = X + dX
         X[3] = Lambda*(1+dX[3])
 
-        if dX[4]<0.00001:
+        if (dX<0.00001).all():
             break
         continue
 
 
     return X
 
+# 由模型点坐标到大地坐标
 def getGeodeticPoint(AO_elements, auxilary):
 
     R = rotationMatrix(AO_elements[4], AO_elements[5], AO_elements[6])
 
-    print(AO_elements)
-    print(auxilary)
     n = auxilary.shape[0]
     geodetic_point = np.zeros((n,3))
     for i in range(n):
@@ -111,7 +111,7 @@ def getGeodeticPoint(AO_elements, auxilary):
 if __name__=="__main__":
     
     f = 150
-    path = 'input1.xlsx'
+    path = 'data/input1.xlsx'
     df = pd.read_excel(path, engine='openpyxl', dtype=float)
     coordination = df.to_numpy()
     point_left = coordination[0:4,0:2] 
@@ -132,4 +132,4 @@ if __name__=="__main__":
 
     result = getGeodeticPoint(AO_elements, unknown_auxi_ground-means_auxi)
 
-    print(result + means_geodetic)
+    print("未知点坐标\n", result + means_geodetic)
