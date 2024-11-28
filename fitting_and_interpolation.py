@@ -59,9 +59,9 @@ def moving_surface(nearby_points, target_point):
     M = np.vstack((nearby_points[:,0]**2, nearby_points[:,0]*nearby_points[:,1], nearby_points[:,1]**2, nearby_points[:,0], nearby_points[:,1], np.ones(n))).T
     Z = nearby_points[:,2]
 
-    dX = (np.linalg.inv(M.T@P@M)@M.T@P@Z.T).ravel()
+    X = (np.linalg.inv(M.T@P@M)@M.T@P@Z.T).ravel()
 
-    return dX[5]
+    return X[5]
 
 # 矩阵输出为tif
 def output2tif(array, file_path):
@@ -109,7 +109,8 @@ if __name__=="__main__":
     moving = moving[:,2].reshape((88,55)).T
 
     linear = linear_fitting(moving, 15, 10)
-
+    df = pd.DataFrame(linear)
+    df.to_csv('output/linear.csv', index=False)
 
     output2tif(linear, 'output\linear.tif')
 
